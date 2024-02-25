@@ -2,9 +2,9 @@
 
 
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import { promises as fs } from 'fs';
+import * as fs from 'fs'
 import lastSchema from './schema';
-
+import { BSON } from 'mongodb';
 
 
 export async function connectToDatabase(connectionString : string) {
@@ -24,7 +24,7 @@ export async function insertJSONData(collectionName : string = 'test') {
     try {
         const collection =  mongoose.model(collectionName, lastSchema)
         // Read JSON file
-        const jsonStr: string = await fs.readFile('./data/jsonArray.json', 'utf-8');
+        const jsonStr = await fs.readFileSync('./data/jsonArray.json', 'utf-8');
         const jsonData: any[] = JSON.parse(jsonStr);
 
 
@@ -65,7 +65,8 @@ function correctData(jsonData : any){
     }
     // Convert $date to Date
     if (item.hasOwnProperty('$date')) {
-        return new Date(item['$date']);
+       return new Date(parseInt(item['$date']["$numberLong"]));
+         
     }
     // Convert $oid to ObjectId
     if (item.hasOwnProperty('$oid')) {
